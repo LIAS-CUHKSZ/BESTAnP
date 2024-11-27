@@ -43,6 +43,8 @@ sonar-only measurements.
 
 Anp simulator is a ROS package developed under ros-noetic with which you can test your own algorithm. If you want to generate data set by our own, you can use our package.
 
+![AnP simulator](./fig/gif.gif)
+
 # **Contact**
 
 - Lingpeng Chen (lingpengchen@link.cuhk.edu.cn)
