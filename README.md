@@ -1,7 +1,7 @@
+<div align="center">
 # BESTAnP
 
-**[IEEE RA-L]** This repository is the official code for [**BESTAnP**: Bi-Step Efficient and Statistically](https://arxiv.org/abs/2411.17521)
-Optimal Estimator for Acoustic-n-Point Problem
+**[IEEE RA-L]** This repository is the official code for [**BESTAnP**: Bi-Step Efficient and Statistically Optimal Estimator for Acoustic-n-Point Problem](https://arxiv.org/abs/2411.17521)
 
 Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citations?user=8jlmwvoAAAAJ&hl=en)*, [Guangyang Zeng](https://guangyangzeng.github.io/)†,Yunling Shao, Yuze Hong, [Chao Yang](https://chaoyang2013.github.io/)†, [Ziyang Hong](https://scholar.google.com/citations?user=IUi8EjkAAAAJ&hl=en), and [Junfeng Wu](https://lias-cuhksz.github.io/group/junfeng-wu)
 
@@ -19,7 +19,9 @@ Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citati
 - A bi-step algorithm that solves the acoustic-n-point pose estimation problem (estimating sonar sensor's position and orientation using n matching pairs between 3D points in world frame and their 2D projections in sonar image) for 2D forward-looking sonar
 - Decouples pose estimation into two steps: translation estimation via range-based localization, followed by rotation estimation。
 
-![a93ec35a64b044485f87a3d338f7093.png](BESTAnP%20148ff726fd3e805c8a51ff17ed27806f/a93ec35a64b044485f87a3d338f7093.png)
+![a93ec35a64b044485f87a3d338f7093.png](https://github.com/LIAS-CUHKSZ/BESTAnP/tree/main/fig/illustration.png)
+</div>
+
 
 # What this repo provide and how to use
 
