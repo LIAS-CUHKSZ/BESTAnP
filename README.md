@@ -1,15 +1,15 @@
 <div align="center">
-# **BESTAnP**
-</div>
 
-**[IEEE RA-L]** This repository is the official code for [**BESTAnP**: Bi-Step Efficient and Statistically Optimal Estimator for Acoustic-n-Point Problem](https://arxiv.org/abs/2411.17521)
+# BESTAnP
 
-<div align="center">
-Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citations?user=8jlmwvoAAAAJ&hl=en)*, [Guangyang Zeng](https://guangyangzeng.github.io/)†,Yunling Shao, Yuze Hong, [Chao Yang](https://chaoyang2013.github.io/)†, [Ziyang Hong](https://scholar.google.com/citations?user=IUi8EjkAAAAJ&hl=en), and [Junfeng Wu](https://lias-cuhksz.github.io/group/junfeng-wu)
+**[IEEE RA-L]** This repository is the official code for [BESTAnP: Bi-Step Efficient and Statistically Optimal Estimator for Acoustic-n-Point Problem](https://arxiv.org/abs/2411.17521)
+
+Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citations?user=8jlmwvoAAAAJ&hl=en)*, [Guangyang Zeng](https://guangyangzeng.github.io/)†, Yunling Shao, Yuze Hong, [Chao Yang](https://chaoyang2013.github.io/)†, [Ziyang Hong](https://scholar.google.com/citations?user=IUi8EjkAAAAJ&hl=en), and [Junfeng Wu](https://lias-cuhksz.github.io/group/junfeng-wu)
 
 (* represents equal contribution.)
 
 [**The Laboratory for Intelligent Autonomous Systems (LIAS)**](https://lias-cuhksz.github.io/)
+
 </div>
 
 # **News**
