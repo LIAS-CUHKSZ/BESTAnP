@@ -22,7 +22,7 @@ Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citati
 - A bi-step algorithm that solves the acoustic-n-point pose estimation problem (estimating sonar sensor's position and orientation using n matching pairs between 3D points in world frame and their 2D projections in sonar image) for 2D forward-looking sonar
 - Decouples pose estimation into two steps: translation estimation via range-based localization, followed by rotation estimation。
 
-![a93ec35a64b044485f87a3d338f7093.png](https://github.com/LIAS-CUHKSZ/BESTAnP/tree/main/fig/illustration.png)
+![illustration.png](https://github.com/LIAS-CUHKSZ/BESTAnP/tree/main/fig/illustration.png)
 
 
 # What this repo provide and how to use
