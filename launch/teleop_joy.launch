@@ -1,0 +1,12 @@
+<launch>
+  <arg name="joy_id" default="0"/>
+
+  <!-- Launch the joystick node -->
+  <node pkg="joy" type="joy_node" name="joystick">
+    <param name="autorepeat_rate" value="10"/>
+    <param name="dev" value="/dev/input/js$(arg joy_id)"/>
+  </node>
+
+  <!-- Launch the joy_to_cmd_vel node -->
+  <node pkg="BESTAnP" type="joy_to_cmd.py" name="joy_to_cmd" output="screen"/>
+</launch>

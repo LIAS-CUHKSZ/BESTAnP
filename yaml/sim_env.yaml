@@ -1,0 +1,31 @@
+points_parameters:
+  xmin: -10
+  xmax: 10
+  ymin: -10
+  ymax: 10
+  zmin: -2
+  zmax: 2
+  pts_num: 5000
+
+sonar_attribute:
+  fov_horizontal: 60
+  fov_vertical: 20
+  range_max: 6
+
+sonar_image:
+  img_width: 500
+  img_height: 500
+
+sonar_noise:
+  Rho_noise: 0.0001
+  theta_noise: 0.0001
+  # Rho_noise: 0.0005
+  # theta_noise: 0.0002
+  # Rho_noise: 0.005 
+  # theta_noise: 0.001
+
+# 0 manual joystick 
+# 1 manual rviz drag and keyboard
+# 2 predetermined trajectory 
+sonar_control_mode: 2
+

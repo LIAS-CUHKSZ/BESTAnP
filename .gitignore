@@ -1,0 +1,4 @@
+build/*
+/record/*
+!/record/analysis_traj.py
+/scripts/anp/__pycache__/*
