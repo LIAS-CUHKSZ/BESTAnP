@@ -90,9 +90,6 @@ class Anp_sim:
             self.cmd_vel_sub = rospy.Subscriber('/joy/cmd_vel', Twist, self.remoter_callback)
         elif  sonar_ctrl_mode == 1:
             self.sonar_pose_sub = rospy.Subscriber('/set_sonar_pose', PoseStamped, self.set_pose_callback)
-        elif  sonar_ctrl_mode == 2:
-            self.sonar_pose_sub = rospy.Subscriber('/set_sonar_pose', PoseStamped, self.set_pose_callback)
-        # self.traj_est_pub = rospy.Publisher("/trajectory_est", Path, queue_size=10)
 
 
         # Sonar
@@ -130,9 +127,9 @@ class Anp_sim:
         
         # 限制平移部分在指定边界内
         T_world_t = T_world[:3, 3]
-        T_world_t[0] = np.clip(T_world_t[0], -2, 2)
-        T_world_t[1] = np.clip(T_world_t[1], -2, 2)
-        T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
+        # T_world_t[0] = np.clip(T_world_t[0], -2, 2)
+        # T_world_t[1] = np.clip(T_world_t[1], -2, 2)
+        # T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
         # T_world_t[0] = np.clip(T_world_t[0], self.xmin, self.xmax)
         # T_world_t[1] = np.clip(T_world_t[1], self.ymin, self.ymax)
         # T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
