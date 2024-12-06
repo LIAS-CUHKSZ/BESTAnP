@@ -2,8 +2,8 @@
 
 ## Overview
 The sonar-based odometry mainly includes three components:
-1. Initialization
-2. AnP pose tracking  
+1. Initialization 
+2. AnP pose tracking
 3. 3D reconstruction
 
 At the initialization stage, the noise-corrupted poses at the first two frames are provided so that some initial points (simultaneously observed from these two poses) can be triangulated via the ANRS algorithm. After the initialization stage, AnP and ANRS algorithms are alternately executed to form a full odometry system. Specifically, the AnP algorithm is used to track new sonar frames with already reconstructed 3D points, while the ANRS algorithm triangulates new points to the map with latest two sonar frames.
@@ -30,11 +30,7 @@ Copy
 ## Simulator
 ![Simulator](figures/simulator.jpg)
 
-The simulator shows:
-- Red dots: 3D feature points in the environment
-- Green space: Sonar's field of view (FOV)
-- Blue dots: Feature points within the FOV
-- Red curve: Robot's trajectory
+*Illustration of our simulator. Red dots are 3D feature points in the environment. The green space shows the sonar's field of view (FOV), and blue dots are the feature points within the FOV. The red curve is the robot's trajectory.*
 
 ## Experimental Setup
 - Sonar's measurable distance and angle ranges match previous subsection
