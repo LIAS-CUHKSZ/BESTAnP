@@ -4,7 +4,7 @@
 
 </div>
 
-**[IEEE RA-L]** This repository is the official code for [BESTAnP: Bi-Step Efficient and Statistically Optimal Estimator for Acoustic-n-Point Problem](https://arxiv.org/abs/2411.17521)
+**[Submitted to IEEE RA-L]** This repository is the official code for [BESTAnP: Bi-Step Efficient and Statistically Optimal Estimator for Acoustic-n-Point Problem](https://arxiv.org/abs/2411.17521)
 
 <div align="center">
 
