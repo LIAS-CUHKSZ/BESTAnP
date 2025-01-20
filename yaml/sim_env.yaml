@@ -22,5 +22,5 @@ sonar_noise:
 
 # 0 manual joystick 
 # 1 predetermined trajectory 
-sonar_control_mode: 0
+sonar_control_mode: 1
 

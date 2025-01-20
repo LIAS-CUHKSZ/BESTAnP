@@ -2,3 +2,5 @@ build/*
 /record/*
 !/record/analysis_traj.py
 /scripts/anp/__pycache__/*
+/scripts/simulation/convert.py
+/scripts/simulation/simulator_for_rss.py
