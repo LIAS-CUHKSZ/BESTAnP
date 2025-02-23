@@ -327,7 +327,8 @@ if __name__ == "__main__":
     methods = ['ToCAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
     trajectory_shape = ['square', 'circle', 'eight']
     # trajectory_shape = ['circle', 'eight']
-    seed_list = [i for i in range(100)]
+    seed_list = [i for i in range(1000)]
+    # seed_list = [36, 78]
     all_results = np.zeros((len(seed_list), len(methods)*len(trajectory_shape), 4))  # (seed_num, methods, metrics)
 
     for i, test_seed_num in enumerate(seed_list):
@@ -340,6 +341,7 @@ if __name__ == "__main__":
             for method in methods:
                 try:
                     path = "data/{shape}/noisy_data/noisy_data_seed_{test_seed_num}.csv".format(shape=shape, test_seed_num=test_seed_num)
+                    if method == "ToCAnP"
                     anp_slam = AnPSonarSLAM(data_path=path, method=method)
                     anp_slam.run()
                     real_poses, estimated_poses = anp_slam.get_result()

@@ -55,7 +55,7 @@ class TrajectoryPlotter:
         
         # Add legend
         self.ax.legend()
-        # self.ax.set_zlim(0.25,0.75)
+        self.ax.set_zlim(0,1.25)
         
         self.ax.grid(True)
         plt.show()
@@ -175,7 +175,7 @@ def calculate_RPE(real_poses, estimated_poses):
 if __name__ == "__main__":
 
     plotter = TrajectoryPlotter()
-    index = 3  # 1 circle 2 eight 3 square
+    index = 2+3  # 1 circle 2 eight 3 square
     ToCAnP_path = "/home/clp/catkin_ws/src/BESTAnP/record/ToCAnP/record{index}/atraj.csv".format(index=str(index))
     CIO_path = "/home/clp/catkin_ws/src/BESTAnP/record/CombineCIO/record{index}/atraj.csv".format(index=str(index))
     Nonapp_path = "/home/clp/catkin_ws/src/BESTAnP/record/Nonapp/record{index}/atraj.csv".format(index=str(index))

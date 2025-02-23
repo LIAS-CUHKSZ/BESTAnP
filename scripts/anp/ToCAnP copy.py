@@ -46,10 +46,8 @@ def ToCAnP(p_w, p_si_noise):
     S = np.zeros((6, 6))
     S[:3, :3] = p_w_centered @ p_w_centered.T / num_points
 
-
-
     # 计算最大特征值对应的sigma^2
-    eigvals = eig(inv(Q)@S)[0]
+    eigvals = eig(Q, S)[0]
     stdVar_noise_theta_est = np.sqrt(1 / max(eigvals.real))
 
     C = stdVar_noise_theta_est ** 2 * S
@@ -80,72 +78,47 @@ def ToCAnP(p_w, p_si_noise):
     R_est_noise = R_est_noise.T
 
     # 高斯牛顿优化
-    e_1 = np.array([1, 0, 0]).reshape(3,1)
-    e_2 = np.array([0, 1, 0]).reshape(3,1)
-
+    e_1 = np.array([1, 0, 0])
+    e_2 = np.array([0, 1, 0])
     I = np.eye(3)
-    u_i = p_w - t_est_noise.reshape(-1, 1)
 
-    
-    f_1_residual = ((d_noise - np.linalg.norm(u_i, axis=0)) / stdVar_noise_d_est).reshape(num_points,1)
-
-
-    # stdVar_noise_theta_est = 1
-    f_2_residual = ((tan_theta_noise - e_2.T @ R_est_noise.T @ u_i / (e_1.T @ R_est_noise.T @ u_i)) / stdVar_noise_theta_est).reshape(num_points,1)
-
-
-    Residuals_R = np.zeros((2 * num_points, 1))
-    Residuals_R[0::2] = f_1_residual
-    Residuals_R[1::2] = f_2_residual
-
-    J_phi = np.array([
-        [0, 0, 0],
-        [0, 0, 1],
-        [0, -1, 0],
-        [0, 0, -1],
-        [0, 0, 0],
-        [1, 0, 0],
-        [0, 1, 0],
-        [-1, 0, 0],
-        [0, 0, 0]
-    ])
-
-    # R_est_noise_T = R_est_noise.T
-    # vec_R = R_est_noise_T.flatten()
-
-    ukronR_2 = np.kron(u_i.T @ R_est_noise, I)
-    g_2 = (e_2.T @ R_est_noise.T @ u_i).reshape(1,num_points)
-    h_2 = (e_1.T @ R_est_noise.T @ u_i).reshape(1,num_points)
-
-    J_R_2 = np.zeros((2 * num_points, 6))
-    J_R_2[0::2, 3:6] = (u_i / np.linalg.norm(u_i, axis=0) / stdVar_noise_d_est).T
-
-    h_g_result = (h_2.T@ e_2.T  - g_2.T @ e_1.T )
+    Residuals_R = np.zeros(2 * num_points)
+    J_R = np.zeros((2 * num_points, 6))
 
     for i in range(num_points):
-        J_R_2[2 * i + 1, :3] = -h_g_result[i,:].reshape(1,3) @ ukronR_2[3 * i:3 * (i + 1), :] @ J_phi / (h_2[:,i]**2) / stdVar_noise_theta_est
+        Residuals_R[2 * i] = (d_noise[i] - np.linalg.norm(p_w[:, i] - t_est_noise))
+        Residuals_R[2 * i + 1] = (tan_theta_noise[i] -
+                                  (e_2 @ R_est_noise.T @ (p_w[:, i] - t_est_noise)) /
+                                  (e_1 @ R_est_noise.T @ (p_w[:, i] - t_est_noise)))
 
-    J_R_2[1::2, 3:6] = ((h_g_result @ R_est_noise.T).T / (h_2**2 * stdVar_noise_theta_est)).T
+        J_phi = np.array([[0, 0, 0],
+                          [0, 0, 1],
+                          [0, -1, 0],
+                          [0, 0, -1],
+                          [0, 0, 0],
+                          [1, 0, 0],
+                          [0, 1, 0],
+                          [-1, 0, 0],
+                          [0, 0, 0]])
 
+        vec_R = R_est_noise.T.flatten()
+        ukronR = np.kron((p_w[:, i] - t_est_noise).T @ R_est_noise, I)
+        g = e_2 @ np.kron((p_w[:, i] - t_est_noise).T, np.eye(3)) @ vec_R
+        h = e_1 @ np.kron((p_w[:, i] - t_est_noise).T, np.eye(3)) @ vec_R
 
-    temp_result = np.concatenate((np.zeros(3),t_est_noise)).reshape(6,1)-inv(J_R_2.T @ J_R_2)@ (J_R_2.T @ Residuals_R)
+        norm_diff = np.linalg.norm(p_w[:, i] - t_est_noise)
+        J_R[2 * i, 3:6] = (p_w[:, i] - t_est_noise).T / norm_diff
+        J_R[2 * i + 1, :3] = -(h * e_2 - g * e_1) @ ukronR @ J_phi / h ** 2
+        J_R[2 * i + 1, 3:6] = (h * e_2 - g * e_1) @ R_est_noise.T / h ** 2
 
+    temp_result = np.concatenate([[0, 0, 0], t_est_noise]) - inv(J_R.T @ J_R) @ J_R.T @ Residuals_R
 
-    t_est_noise_GN = temp_result[3:6].flatten()
+    t_est_noise_GN = temp_result[3:6]
+    s_new = temp_result[:3]
+    s_matrix = np.array([[0, -s_new[2], s_new[1]],
+                         [s_new[2], 0, -s_new[0]],
+                         [-s_new[1], s_new[0], 0]])
 
-    s_new = temp_result[:3].flatten()
-    
-    s_matrix = np.array([
-        [0, -s_new[2], s_new[1]],
-        [s_new[2], 0, -s_new[0]],
-        [-s_new[1], s_new[0], 0]
-    ])
-
-
-    theta = np.linalg.norm(s_new)
-    R_approx = np.eye(3) + np.sin(theta) / theta * s_matrix + (1 - np.cos(theta)) / theta**2 * (s_matrix @ s_matrix)
-
-    R_est_noise_GN = R_est_noise @ R_approx
-
+    R_est_noise_GN = R_est_noise @ expm(s_matrix)
     
     return R_est_noise_GN, t_est_noise_GN

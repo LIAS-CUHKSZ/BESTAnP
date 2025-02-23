@@ -10,8 +10,8 @@ SONAR_NOISE: # Noise for Rho and Theta
   theta_noise_std: 0.001
 
 
-RECORD: FALSE
-# RECORD: TRUE
+# RECORD: FALSE
+RECORD: TRUE
 
 ERROR_THRESHOLD_BREAK: 0.5
 
