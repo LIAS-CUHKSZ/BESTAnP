@@ -107,50 +107,66 @@ class SonarDataReader:
                     'si_q_xy': si_q_xy,
                     'si_q_theta_Rho': si_q_theta_Rho,
                     'si_q_xy_img_frame': si_q_xy_img_frame,
-                    'timestep': timestep,
-                    'pts_indice': pts_indice
-                })
-                
-    def read_data_old(self):
-        with open(self.filepath, 'r') as file:
-            reader = csv.reader(file)
-            # headers = next(reader)  # 跳过表头
-
-            for row in reader:
-                pose_x = float(row[0])
-                pose_y = float(row[1])
-                pose_z = float(row[2])
-                pose_orient_x = float(row[3])
-                pose_orient_y = float(row[4])
-                pose_orient_z = float(row[5])
-                pose_orient_w = float(row[6])
-
-                w_p = np.array(eval(row[7]))
-                s_p = np.array(eval(row[8]))
-                si_q_xy = np.array(eval(row[9]))
-                si_q_theta_Rho = np.array(eval(row[10]))
-                # si_q_xy_img_frame = np.array(eval(row[11]))
-                timestep = int(row[11])
-                pts_indice = np.array(eval(row[12]))
-                # timestep = int(row[12])
-                # pts_indice = np.array(eval(row[13]))
-
-                self.data.append({
-                    'pose': {
-                        'position': {'x': pose_x, 'y': pose_y, 'z': pose_z},
-                        'orientation': {'x': pose_orient_x, 'y': pose_orient_y, 'z': pose_orient_z, 'w': pose_orient_w}
-                    },
-                    'w_p': w_p,
-                    's_p': s_p,
-                    'si_q_xy': si_q_xy,
-                    'si_q_theta_Rho': si_q_theta_Rho,
-                    'timestep': timestep,
+                    'timestamp': timestep,
                     'pts_indice': pts_indice
                 })
 
     def get_data(self):
         return self.data
 
+class SonarNoisyDataReader:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.data = []
+
+    def read_data(self):
+        with open(self.filepath, 'r') as file:
+            reader = csv.reader(file)
+            next(reader)  # 跳过表头
+
+            for row in reader:
+                # 解析真实位姿
+                true_pose_x = float(row[1])
+                true_pose_y = float(row[2])
+                true_pose_z = float(row[3])
+                true_pose_orient_x = float(row[4])
+                true_pose_orient_y = float(row[5])
+                true_pose_orient_z = float(row[6])
+                true_pose_orient_w = float(row[7])
+
+                # 解析带噪声位姿
+                noisy_pose_x = float(row[8])
+                noisy_pose_y = float(row[9])
+                noisy_pose_z = float(row[10])
+                noisy_pose_orient_x = float(row[11])
+                noisy_pose_orient_y = float(row[12])
+                noisy_pose_orient_z = float(row[13])
+                noisy_pose_orient_w = float(row[14])
+
+                # 解析点索引和带噪声的声呐测量
+                pts_indice = np.array(eval(row[15]))
+                noisy_si_q_theta_Rho = np.array(eval(row[16]))
+                timestamp = float(row[0])
+
+                # 构造与原格式一致的数据结构
+                self.data.append({
+                    'true_pose': {
+                        'position': {'x': true_pose_x, 'y': true_pose_y, 'z': true_pose_z},
+                        'orientation': {'x': true_pose_orient_x, 'y': true_pose_orient_y, 
+                                      'z': true_pose_orient_z, 'w': true_pose_orient_w}
+                    },
+                    'noisy_pose': {
+                        'position': {'x': noisy_pose_x, 'y': noisy_pose_y, 'z': noisy_pose_z},
+                        'orientation': {'x': noisy_pose_orient_x, 'y': noisy_pose_orient_y, 
+                                      'z': noisy_pose_orient_z, 'w': noisy_pose_orient_w}
+                    },
+                    'si_q_theta_Rho': noisy_si_q_theta_Rho,
+                    'timestamp': timestamp,
+                    'pts_indice': pts_indice
+                })
+
+    def get_data(self):
+        return self.data
 
 if __name__ == '__main__':
     import os
@@ -164,7 +180,7 @@ if __name__ == '__main__':
     
     # Write
     # filepath = "/home/clp/catkin_ws/src/BESTAnP/scripts/sim/noisy_sonar_data.csv"
-    # filepath = "/home/clp/catkin_ws/src/BESTAnP/scripts/sim/sonar_data.csv"
+    # filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_145.csv"
     # reader = SonarDataReader(filepath)
     # reader.read_data()
     # data = reader.get_data()
@@ -181,6 +197,25 @@ if __name__ == '__main__':
     #     # print("Pts Indice: ", entry['pts_indice'])
     #     # print("\n")
     #     break
+    
+    # filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_145.csv"
+    # reader = SonarNoisyDataReader(filepath)
+    # reader.read_data()
+    # data = reader.get_data()
+
+    # # 测试打印读取的数据
+    # for entry in data:
+    #     print("Pose Position: ", entry['true_pose']['position'])
+    #     print("Pose Orientation: ", entry['true_pose']['orientation'])
+    #     print("Pose Position: ", entry['noisy_pose']['position'])
+    #     print("Pose Orientation: ", entry['noisy_pose']['orientation'])
+    #     print("si_q_theta_Rho: ", entry['si_q_theta_Rho'])
+    #     print("Timestamp: ", entry['timestamp'])
+    #     print("Pts Indice: ", entry['pts_indice'])
+    #     print("\n")
+    #     break
+
+
 
 
   

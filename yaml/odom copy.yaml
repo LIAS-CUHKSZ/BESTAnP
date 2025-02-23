@@ -1,0 +1,28 @@
+random_seed: 3466
+RECONSTRUCTION_ERROR_THRESHOLD: 0.0001
+DETERMINANT_THRESHOLD: 0.001
+
+# ANP_METHOD: "ToCAnP"
+# ANP_METHOD: "App"
+# ANP_METHOD: "Nonapp"
+# ANP_METHOD: "CombineCIO"
+ANP_METHOD: "BESTAnPCIO"
+
+INITIALIZE: # Noise for pose during the initialization stage
+  rotation_noise_std: 0.001
+  translation_noise_std: 0.001
+
+SONAR_NOISE: # Noise for Rho and Theta 
+  Rho_noise_std: 0.001
+  theta_noise_std: 0.001
+
+
+RECORD: FALSE
+# RECORD: TRUE
+
+ERROR_THRESHOLD_BREAK: 0.5
+
+
+# data_path: "/data/really_good_eight/sonar_data.csv"
+data_path: "/data/square/sonar_data.csv"
+# data_path: "/data/circle/sonar_data.csv"

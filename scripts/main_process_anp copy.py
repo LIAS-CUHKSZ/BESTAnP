@@ -27,17 +27,15 @@ from utils.coordinate_system_transform import (
     coordinate_transform_pt_back
 )
 from utils.transformation_matrix_add_noise import add_noise_to_pose
-from record.analysis_trajectory import calculate_ATE, calculate_RPE
+from utils.analysis_traj import calculate_ATE, calculate_RPE
 
-clp = 0 # 2 3 4 
 
 class AnPSonarSLAM:
     def __init__(self, data_path=None, method=None):
         self.config = self.read_config()
-        # np.random.seed(self.config['seed'])
-        self.method = method or self.config['ANP_METHOD']
+        self.method = method
         
-        self.sonar_data_dir = os.path.join(str(BESTAnP_dir), data_path or self.config['DATA_PATH'])
+        self.sonar_data_dir = os.path.join(str(BESTAnP_dir), data_path)
         self.record_dir = os.path.join(BESTAnP_dir, "record", self.method)
         
         self.anp_algorithm = AnPAlgorithm(self.method)
@@ -49,13 +47,11 @@ class AnPSonarSLAM:
         self.real_poses = []
         self.estimated_poses = []
 
-        if "square" in data_path:
-            self.first_index = clp
-            self.second_index = clp+4
-        else:
-            self.first_index = 0
-            self.second_index = 4
-        self.step_size = 4
+    
+        self.first_index = 0
+        self.second_index = 5
+        
+        self.step_size = 5
         
         self.T1 = None  # Will be initialized in initialize_transformations()
         self.theta_Rho1 = None
@@ -70,24 +66,15 @@ class AnPSonarSLAM:
         with open(os.path.join(BESTAnP_dir, 'yaml/odom.yaml'), 'r') as file:
             odom_params = yaml.safe_load(file)
             config.update({
-                'seed': int(odom_params['random_seed']),
                 'RECONSTRUCTION_ERROR_THRESHOLD': odom_params['RECONSTRUCTION_ERROR_THRESHOLD'],
                 'DETERMINANT_THRESHOLD': odom_params['DETERMINANT_THRESHOLD'],
                 'RECORD': odom_params['RECORD'],
-                'DATA_PATH': odom_params['data_path'],
-                'ANP_METHOD': odom_params['ANP_METHOD'],
-                'rotation_noise_std': float(odom_params['INITIALIZE']['rotation_noise_std']),
-                'translation_noise_std': float(odom_params['INITIALIZE']['translation_noise_std']),
-                'Rho_noise_std': float(odom_params['SONAR_NOISE']['Rho_noise_std']),
-                'theta_noise_std': float(odom_params['SONAR_NOISE']['theta_noise_std']),
             })
         # Read sim_env.yaml
         with open(os.path.join(BESTAnP_dir, 'yaml/sim_env.yaml'), 'r') as file:
             sim_env_params = yaml.safe_load(file)
             config['PHI_MAX'] = int(sim_env_params['sonar_attribute']['fov_vertical']) * np.pi / 180
         
-        # Overwrite DATA_PATH if necessary
-        config['DATA_PATH'] = "data/circle/sonar_data.csv"
         return config
 
     def initialize_data(self):
@@ -98,6 +85,7 @@ class AnPSonarSLAM:
         self.data = reader.get_data()
         # Record setup
         if self.config['RECORD']:
+            os.makedirs(self.record_dir, exist_ok=True)
             try:
                 file_number = max([
                     int(f[6:]) for f in os.listdir(self.record_dir)
@@ -110,41 +98,21 @@ class AnPSonarSLAM:
         else:
             self.record_folder = None
 
-    def theta_Rho_add_noise(self, theta_Rho):
-        """Add noise to theta and Rho measurements."""
-        theta = theta_Rho[:, 0]
-        Rho = theta_Rho[:, 1]
-        theta_noise = np.random.normal(0, self.config['theta_noise_std'], size=theta.shape)
-        new_theta = np.arctan(np.tan(theta) + theta_noise)
-        Rho_noise = np.random.normal(0, self.config['Rho_noise_std'], size=Rho.shape)
-        new_Rho = Rho + Rho_noise
-        return np.vstack((new_theta, new_Rho)).T
-
     def initialize_transformations(self):
         """Initialize transformations with noise."""
         first_index = self.first_index
         second_index = self.second_index
         data = self.data
         # Initialize transformations with noise
-        T0 = add_noise_to_pose(
-            ros_pose_to_transform_matrix(data[first_index]['pose']),
-            rotation_noise_std=self.config['rotation_noise_std'],
-            translation_noise_std=self.config['translation_noise_std']
-        )
-        T1 = add_noise_to_pose(
-            ros_pose_to_transform_matrix(data[second_index]['pose']),
-            rotation_noise_std=self.config['rotation_noise_std'],
-            translation_noise_std=self.config['translation_noise_std']
-        )
+        T0 = ros_pose_to_transform_matrix(data[first_index]['pose'])
+          
+        T1 = ros_pose_to_transform_matrix(data[second_index]['pose'])
+        
         self.T0 = T0  # May not be needed later
         self.T1 = T1
         # Add noise to initial measurements
-        theta_Rho0 = self.theta_Rho_add_noise(
-            data[first_index]['si_q_theta_Rho']
-        )
-        theta_Rho1 = self.theta_Rho_add_noise(
-            data[second_index]['si_q_theta_Rho']
-        )
+        theta_Rho0 = data[first_index]['si_q_theta_Rho']
+        theta_Rho1 = data[second_index]['si_q_theta_Rho']
         self.theta_Rho0 = theta_Rho0
         self.theta_Rho1 = theta_Rho1
         self.pts_indice0 = data[first_index]['pts_indice']
@@ -214,9 +182,7 @@ class AnPSonarSLAM:
         P_dict = self.P_dict
 
         # Add noise to current measurements
-        theta_Rho2 = self.theta_Rho_add_noise(
-            entry['si_q_theta_Rho']
-        )
+        theta_Rho2 = entry['si_q_theta_Rho']
         pts_indice2 = entry['pts_indice']
 
         # Find matching points in P_dict
@@ -241,6 +207,8 @@ class AnPSonarSLAM:
         R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
             P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
         )
+        # print(R_SW_true-R_sw_cal)
+        # print(np.linalg.norm (t_S_true.T-t_s_cal) )
         T2 = np.eye(4)
         T2[:3, :3], T2[:3, 3] = R_sw_cal, t_s_cal.flatten()
     
@@ -350,18 +318,46 @@ class AnPSonarSLAM:
         
         for timestep in range(self.second_index + self.step_size, len(self.data), self.step_size):
             entry = self.data[timestep]
-            # print(f"\n=== Timestep: {timestep} ===")
             self.perform_time_step(timestep, entry)
     
     def get_result(self):
         return np.array(self.real_poses), np.array(self.estimated_poses)
         
 if __name__ == "__main__":
-    methods = ['ToCAnP', 'CombineCIO', 'Nonapp', 'App']
+    methods = ['ToCAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
     trajectory_shape = ['square', 'circle', 'eight']
-    # [145, 266, 637, 681, 934, 961, 1073, 1204, 1208, 1243, 1475, 1728, 1755, 1942, 2513, 2619, 2629, 3466, 3774, 3902, 4304, 4690, 4743, 4958]
+    seed_list = [145]
+    # seed_list = [145, 266, 637, 681, 934, 961, 1073, 1204, 1208, 1243, 1475, 1728, 1755, 1942, 2513, 2619, 2629, 3466, 3774, 3902, 4304, 4690, 4743, 4958]
+    all_results = np.zeros((len(seed_list), 15, 4))  # (seed_num, methods, metrics)
 
     test_seed_num = 145
+    for i, test_seed_num in enumerate(seed_list):
+        print(test_seed_num)
+        results_matrix = np.zeros((15, 4))  
+        np.random.seed(test_seed_num) 
+        row_index = 0  
+        for shape in trajectory_shape:
+            print(shape)
+            print("{:<10} {:<8}  {:<8}  {:<8}  {:<8}".format("method", "ATE_t", "ATE_R", "RPE_t", "RPE_R"))
+            for method in methods:
+                path = "data/{shape}/sonar_data.csv".format(shape=shape)
+                anp_slam = AnPSonarSLAM(data_path=path, method=method)
+                anp_slam.run()
+                real_poses, estimated_poses = anp_slam.get_result()
+                ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
+                RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
+                print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
+                # print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, 0, 0, 0, 0))
+                results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
+                row_index += 1
+        
+        print(results_matrix)
+        all_results[i] = results_matrix     
+        
+        print("============================")
+    
+    
+    test_seed_num = 145 # circle
     if True:
         np.random.seed(test_seed_num)  
         for shape in trajectory_shape:
@@ -378,80 +374,8 @@ if __name__ == "__main__":
                     print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
 
                 except:
-                        print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, 0, 0, 0, 0))
-                    
+                    print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, 0, 0, 0, 0))
+                 
 
-    
-    ####################################################
-    ################# BATCH EXPERIMENT #################
-    ####################################################
-    # import sys      
-    else:
-        file_name = 'results/all_metrics_001_5000.npy'
-        
-        size = 5000
-        all_results = np.zeros((size, 12, 4))  # (seed_num, methods, metrics)
-        for seed_num in range(size):
-            # np.random.seed(seed_num)
-            np.random.seed(seed_num)  
-            print("Random Seed Number: ", seed_num)
-            results_matrix = np.zeros((12, 4))
-            row_index = 0  # To track the current row in the matrix
-            for shape in trajectory_shape:
-                for method in methods:       
-                    try:
-                        path = "data/{shape}/sonar_data.csv".format(shape=shape)
-                        anp_slam = AnPSonarSLAM(data_path=path, method=method)
-                        anp_slam.run()
-                        real_poses, estimated_poses = anp_slam.get_result()
-                        ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
-                        RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
-                        results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
-                    
-                    except:
-                        print("PROBLEM!")
-                        results_matrix[row_index] = [0, 0, 0, 0]
-                        
-                    row_index += 1
-            all_results[seed_num] = results_matrix     
-   
-        print(all_results)
-        np.save(file_name, all_results)
-        print("DONE")
-    
-    
-    # #     ##################################################################
-    # size = 2
-    # all_results = np.zeros((size, 12, 4))  # (seed_num, methods, metrics)
-    # for seed_num in range(size):
-    #     np.random.seed(seed_num)
-    #     GOOD_result = 0
-    #     print("Random Seed Number: ", seed_num)
-    #     results_matrix = np.zeros((12, 4))
-    #     row_index = 0  # To track the current row in the matrix
-    #     for shape in trajectory_shape:
-    #         print("{:<10} {:<8}  {:<8}  {:<8}  {:<8}".format("method", "ATE_t", "ATE_R", "RPE_t", "RPE_R"))
-    #         for method in methods:       
-    #             try:
-    #                 path = "data/{shape}/sonar_data.csv".format(shape=shape)
-    #                 anp_slam = AnPSonarSLAM(data_path=path, method=method)
-    #                 anp_slam.run()
-    #                 real_poses, estimated_poses = anp_slam.get_result()
-    #                 ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
-    #                 RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
-    #                 results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
-                    
-    #                 print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
-    #             except:
-    #                 print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, 0, 0, 0, 0))
-    #                 print(seed_num)
-    #                 results_matrix[row_index] = [0, 0, 0, 0]
-    #             row_index += 1
-    #         print()
-    #     all_results[seed_num] = results_matrix     
-        
-    #     print()
-    # print(all_results)
-    # np.save('results/all_metrics.npy', all_results)
-    # # 此处print会正常输出到控制台
-    # print("DONE")
+    np.save("/home/clp/catkin_ws/src/BESTAnP/record/all_metrics_001", all_results)   
+    print("Done")

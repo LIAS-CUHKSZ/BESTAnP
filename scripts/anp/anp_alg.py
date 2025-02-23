@@ -17,6 +17,7 @@ sys.path.append(scripts_dir)
 from App_Algorithm_2 import App_Algorithm_2
 from Nonapp_Algorithm_2 import Nonapp_Algorithm_2
 from Combine_CIO_2 import Combine_CIO_2
+from BESTAnP_CIO import BESTAnP_CIO
 from ToCAnP import ToCAnP
 from Calculate_CRLB import Calculate_CRLB
 
@@ -75,6 +76,8 @@ class AnPAlgorithm:
             R_sw, t_s = Nonapp_Algorithm_2(P_W, P_SI, phi_max, R_true)
         elif self.method == "CombineCIO":
             R_sw, t_s = Combine_CIO_2(P_W, P_SI, phi_max, R_true)
+        elif self.method == "BESTAnPCIO":
+            R_sw, t_s = BESTAnP_CIO(P_W, P_SI, phi_max)
         self.t_s, self.R_sw = t_s, R_sw
         
         return self.R_sw, self.t_s
