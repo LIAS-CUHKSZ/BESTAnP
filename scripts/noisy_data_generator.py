@@ -45,7 +45,7 @@ class NoiseDataGenerator:
             header = ['timestamp', 
                      'true_pose_x', 'true_pose_y', 'true_pose_z', 'true_pose_qx', 'true_pose_qy', 'true_pose_qz', 'true_pose_qw',
                      'noisy_pose_x', 'noisy_pose_y', 'noisy_pose_z', 'noisy_pose_qx', 'noisy_pose_qy', 'noisy_pose_qz', 'noisy_pose_qw',
-                     'pts_indice', 'noisy_si_q_theta_Rho']
+                     'pts_indice', 'noisy_si_q_theta_Rho, w_p']
             writer.writerow(header)
 
             # 处理每个时间戳的数据
@@ -77,13 +77,15 @@ class NoiseDataGenerator:
                     *Rotation.from_matrix(noisy_T[:3,:3]).as_quat(),  # 将旋转矩阵转换为四元数[x,y,z,w]
                     # 点索引和带噪声的声呐测量
                     entry['pts_indice'].tolist(),
-                    noisy_theta_Rho.tolist()
+                    noisy_theta_Rho.tolist(),
+                    entry['w_p'].tolist()
                 ]
                 writer.writerow(row_data)
 
 def main():
     # 定义不同的随机种子
     seeds = [i for i in range(100)]
+    # seeds = [0]
     
     # 定义噪声级别
     noise_levels = {

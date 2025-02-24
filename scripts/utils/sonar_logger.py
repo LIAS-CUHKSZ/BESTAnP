@@ -126,6 +126,7 @@ class SonarNoisyDataReader:
 
             for row in reader:
                 # 解析真实位姿
+                timestamp = float(row[0])
                 true_pose_x = float(row[1])
                 true_pose_y = float(row[2])
                 true_pose_z = float(row[3])
@@ -146,7 +147,7 @@ class SonarNoisyDataReader:
                 # 解析点索引和带噪声的声呐测量
                 pts_indice = np.array(eval(row[15]))
                 noisy_si_q_theta_Rho = np.array(eval(row[16]))
-                timestamp = float(row[0])
+                w_p = np.array(eval(row[17]))
 
                 # 构造与原格式一致的数据结构
                 self.data.append({
@@ -162,7 +163,8 @@ class SonarNoisyDataReader:
                     },
                     'si_q_theta_Rho': noisy_si_q_theta_Rho,
                     'timestamp': timestamp,
-                    'pts_indice': pts_indice
+                    'pts_indice': pts_indice,
+                    'w_p': w_p
                 })
 
     def get_data(self):
@@ -174,11 +176,11 @@ if __name__ == '__main__':
     BESTAnP_dir = get_pkg_dir('BESTAnP')
     data_dir = BESTAnP_dir + "/data/sonar_data.csv"
     noisy_data_dir = BESTAnP_dir + "/data/sonar_data_noisy.csv"
-    print(data_dir)
-    sonar_data_write = SonarDataWriter(data_dir, noisy_data_dir)
-    sonar_data_write.write()
+    # print(data_dir)
+    # sonar_data_write = SonarDataWriter(data_dir, noisy_data_dir)
+    # sonar_data_write.write()
     
-    # Write
+    # # Write
     # filepath = "/home/clp/catkin_ws/src/BESTAnP/scripts/sim/noisy_sonar_data.csv"
     # filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_145.csv"
     # reader = SonarDataReader(filepath)
@@ -198,22 +200,22 @@ if __name__ == '__main__':
     #     # print("\n")
     #     break
     
-    # filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_145.csv"
-    # reader = SonarNoisyDataReader(filepath)
-    # reader.read_data()
-    # data = reader.get_data()
+    filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_0_full.csv"
+    reader = SonarNoisyDataReader(filepath)
+    reader.read_data()
+    data = reader.get_data()
 
-    # # 测试打印读取的数据
-    # for entry in data:
-    #     print("Pose Position: ", entry['true_pose']['position'])
-    #     print("Pose Orientation: ", entry['true_pose']['orientation'])
-    #     print("Pose Position: ", entry['noisy_pose']['position'])
-    #     print("Pose Orientation: ", entry['noisy_pose']['orientation'])
-    #     print("si_q_theta_Rho: ", entry['si_q_theta_Rho'])
-    #     print("Timestamp: ", entry['timestamp'])
-    #     print("Pts Indice: ", entry['pts_indice'])
-    #     print("\n")
-    #     break
+    # 测试打印读取的数据
+    for entry in data:
+        print("Pose Position: ", entry['true_pose']['position'])
+        print("Pose Orientation: ", entry['true_pose']['orientation'])
+        print("Pose Position: ", entry['noisy_pose']['position'])
+        print("Pose Orientation: ", entry['noisy_pose']['orientation'])
+        print("si_q_theta_Rho: ", entry['si_q_theta_Rho'])
+        print("Timestamp: ", entry['timestamp'])
+        print("Pts Indice: ", entry['pts_indice'])
+        print("\n")
+        break
 
 
 

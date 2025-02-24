@@ -49,9 +49,9 @@ class AnPSonarSLAM:
 
     
         self.first_index = 0
-        self.second_index = 5
+        self.second_index = 4
         
-        self.step_size = 5
+        self.step_size = 4
         
         self.T1 = None  # Will be initialized in initialize_transformations()
         self.theta_Rho1 = None
@@ -134,10 +134,10 @@ class AnPSonarSLAM:
         theta_Rho, theta_Rho_prime, common_indices = get_match_pairs(
             theta_Rho0, pts_indice0, theta_Rho1, pts_indice1
         )
-        # # Need to get w_P_gt
-        # w_P_gt = data[self.first_index]['w_p']
-        # temp_indices = [np.where(pts_indice0 == idx)[0][0] for idx in common_indices]
-        # w_P_gt = w_P_gt[temp_indices]  # Matching w_P_gt
+        # Need to get w_P_gt
+        w_P_gt = self.data[self.first_index]['w_p']
+        temp_indices = [np.where(pts_indice0 == idx)[0][0] for idx in common_indices]
+        w_P_gt = w_P_gt[temp_indices]  # Matching w_P_gt
         
         # Transformation matrices
         T0_tri = coordinate_transform_Pose(T0)
@@ -158,15 +158,16 @@ class AnPSonarSLAM:
             ps = np.array([-Rho_i * np.sin(theta_i), Rho_i * np.cos(theta_i)])
             ps_prime = np.array([-Rho_prime_i * np.sin(theta_prime_i), Rho_prime_i * np.cos(theta_prime_i)])
             recon_error = reconstrunction_error(s_P, ps, ps_prime, T_matrix)
-            # difference = np.linalg.norm(w_P_gt[i] - w_P)
+            
+            difference = np.linalg.norm(w_P_gt[i] - w_P)
     
             if recon_error < config['RECONSTRUCTION_ERROR_THRESHOLD'] and abs(determinant) > config['DETERMINANT_THRESHOLD']:
                 P_dict[idx] = w_P
                 reconstruction_error_list.append(recon_error)
-                # difference_list.append(difference)
+                difference_list.append(difference)
         # Print statistics
-        # print(f"Mean difference: {np.mean(difference_list)}, Variance: {np.var(difference_list)}")
-        # print(f"Valid points: {len(reconstruction_error_list)}/{len(theta_Rho)}")
+        print(f"Mean difference: {np.mean(difference_list)}, Variance: {np.var(difference_list)}")
+        print(f"Valid points: {len(reconstruction_error_list)}/{len(theta_Rho)}")
         # Update attributes
         self.T1 = T1
         self.theta_Rho1 = theta_Rho1
@@ -202,13 +203,19 @@ class AnPSonarSLAM:
             return  # Skip this timestep since we cannot perform estimation
 
         # Perform ANP Algorithm
+        print(P_w.shape)
         R_SW_true = ros_pose_to_transform_matrix(entry['true_pose'])[:3, :3] # 
-        # t_S_true = ros_pose_to_transform_matrix(entry['true_pose'])[:3, 3].reshape(-1, 1)
+        t_S_true = ros_pose_to_transform_matrix(entry['true_pose'])[:3, 3].reshape(-1, 1)
         R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
             P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
         )
         # print(R_SW_true-R_sw_cal)
-        # print(np.linalg.norm (t_S_true.T-t_s_cal) )
+        # 1. 计算旋转误差矩阵
+        rotation_component = R_SW_true.T @ R_sw_cal
+        rotation_error = np.arccos(np.clip((np.trace(rotation_component) - 1) / 2, -1.0, 1.0))
+        rotation_error_deg = np.rad2deg(rotation_error)
+        print(f"Rotation error: {rotation_error_deg:.2f}°, translation error: {np.linalg.norm (t_S_true.T-t_s_cal)}")
+
         T2 = np.eye(4)
         T2[:3, :3], T2[:3, 3] = R_sw_cal, t_s_cal.flatten()
     
@@ -220,7 +227,12 @@ class AnPSonarSLAM:
         T1_tri = coordinate_transform_Pose(T1)
         T2_tri = coordinate_transform_Pose(T2)
         T_matrix = np.linalg.inv(T2_tri) @ T1_tri
-
+        
+        w_P_gt = entry['w_p']
+        temp_indices = [np.where(pts_indice2 == idx)[0][0] for idx in common_indices]
+        # print(len(common_indices))
+        w_P_gt = w_P_gt[temp_indices]  # Matching w_P_gt
+        
         for i, idx in enumerate(common_indices):
             if idx not in P_dict:
                 s_P, determinant = ANRS(T_matrix, theta_Rho[i], theta_Rho_prime[i])
@@ -233,8 +245,13 @@ class AnPSonarSLAM:
                 ps = np.array([-Rho_i * np.sin(theta_i), Rho_i * np.cos(theta_i)])
                 ps_prime = np.array([-Rho_prime_i * np.sin(theta_prime_i), Rho_prime_i * np.cos(theta_prime_i)])
                 recon_error = reconstrunction_error(s_P, ps, ps_prime, T_matrix)
-                if recon_error < config['RECONSTRUCTION_ERROR_THRESHOLD'] and abs(determinant) > config['DETERMINANT_THRESHOLD']:
+                # if recon_error < config['RECONSTRUCTION_ERROR_THRESHOLD'] and abs(determinant) > config['DETERMINANT_THRESHOLD']:
+                #     P_dict[idx] = w_P  # Update the point dictionary
+                # if np.linalg.norm(w_P_gt[i]- w_P) < config['RECONSTRUCTION_ERROR_THRESHOLD']:
+                # print(np.linalg.norm(w_P_gt[i]- w_P))
+                if np.linalg.norm(w_P_gt[i]- w_P) < 0.01:
                     P_dict[idx] = w_P  # Update the point dictionary
+        # print(len(P_dict))
 
         # Update previous measurements
         self.theta_Rho1 = theta_Rho2
@@ -324,41 +341,20 @@ class AnPSonarSLAM:
         return np.array(self.real_poses), np.array(self.estimated_poses)
         
 if __name__ == "__main__":
-    methods = ['ToCAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
+    # methods = ['ToCAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
+    methods = ['ToCAnP', 'CombineCIO']
     trajectory_shape = ['square', 'circle', 'eight']
-    # trajectory_shape = ['circle', 'eight']
-    seed_list = [i for i in range(1000)]
-    # seed_list = [36, 78]
-    all_results = np.zeros((len(seed_list), len(methods)*len(trajectory_shape), 4))  # (seed_num, methods, metrics)
-
-    for i, test_seed_num in enumerate(seed_list):
-        print(test_seed_num)
-        results_matrix = np.zeros((len(methods)*len(trajectory_shape), 4))  
-        row_index = 0  
-        for shape in trajectory_shape:
-            print(shape)
-            print("{:<10} {:<8}  {:<8}  {:<8}  {:<8}".format("method", "ATE_t", "ATE_R", "RPE_t", "RPE_R"))
-            for method in methods:
-                try:
-                    path = "data/{shape}/noisy_data/noisy_data_seed_{test_seed_num}.csv".format(shape=shape, test_seed_num=test_seed_num)
-                    if method == "ToCAnP"
-                    anp_slam = AnPSonarSLAM(data_path=path, method=method)
-                    anp_slam.run()
-                    real_poses, estimated_poses = anp_slam.get_result()
-                    ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
-                    RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
-                    print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
-                    results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
-                except:
-                    results_matrix[row_index] = [0, 0, 0, 0]
-                    print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, 0, 0, 0, 0))
-                row_index += 1
-        
-        print(results_matrix)
-        all_results[i] = results_matrix     
+    # method = methods[0]
+    # for shape in trajectory_shape:
+    shape = trajectory_shape[0]
+    for method in methods:
+        path = "data/{shape}/noisy_data/noisy_data_seed_{test_seed_num}.csv".format(shape=shape, test_seed_num=1)
+        # path = "data/{shape}/sonar_data.csv".format(shape=shape, test_seed_num=1)
+        anp_slam = AnPSonarSLAM(data_path=path, method=method)
+        anp_slam.run()
+        real_poses, estimated_poses = anp_slam.get_result()
+        ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
+        RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
+        print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
         
         print("============================")
-    
-
-    np.save("/home/clp/catkin_ws/src/BESTAnP/record/all_metrics", all_results)   
-    print("Done")
