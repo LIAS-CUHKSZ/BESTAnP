@@ -1,4 +1,7 @@
 build/*
+data/circle/noisy_data/*
+data/square/noisy_data/*
+data/eight/noisy_data/*
 /record/*
 !/record/analysis_traj.py
 /scripts/anp/__pycache__/*

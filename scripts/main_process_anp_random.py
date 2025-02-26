@@ -363,7 +363,7 @@ if __name__ == "__main__":
     # test_seed_num = 145 # circle
     # [145, 266, 637, 681, 934, 961, 1073, 1204, 1208, 1243, 1475, 1728, 1755, 1942, 2513, 2619, 2629, 3466, 3774, 3902, 4304, 4690, 4743, 4958]
     if True:
-        for test_seed_num in range(5):
+        for test_seed_num in range(1):
             np.random.seed(test_seed_num)  
             for shape in trajectory_shape:
                 print(shape)
@@ -388,17 +388,17 @@ if __name__ == "__main__":
     ####################################################
     # import sys      
     else:
-        index = 4
+        index = 10
         file_name = 'results/all_metrics_{}.npy'.format(index)
         print(file_name)
-        size = 1000
-        all_results = np.zeros((size, 12, 4))  # (seed_num, methods, metrics)
+        size = 500
+        all_results = np.zeros((size, len(methods)*3, 4))  # (seed_num, methods, metrics)
         for i in range(size):
             # np.random.seed(seed_num)
             seed_num = i+index*size
             np.random.seed(seed_num)  
             print("Random Seed Number: ", seed_num)
-            results_matrix = np.zeros((12, 4))
+            results_matrix = np.zeros((len(methods)*3, 4))
             row_index = 0  # To track the current row in the matrix
             for shape in trajectory_shape:
                 for method in methods:       
@@ -417,7 +417,6 @@ if __name__ == "__main__":
                         
                     row_index += 1
             all_results[i] = results_matrix     
-   
         print(all_results)
         np.save(file_name, all_results)
         print("DONE")
