@@ -3,7 +3,7 @@ data/circle/noisy_data/*
 data/square/noisy_data/*
 data/eight/noisy_data/*
 /record/*
-!/record/analysis_traj.py
+!/record/analysis_trajectory.py
 /scripts/anp/__pycache__/*
 /scripts/simulation/convert.py
 /scripts/simulation/simulator_for_rss.py

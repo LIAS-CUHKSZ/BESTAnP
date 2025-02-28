@@ -228,8 +228,11 @@ class AnPSonarSLAM:
         R_SW_true = ros_pose_to_transform_matrix(entry['pose'])[:3, :3]
         t_S_true = ros_pose_to_transform_matrix(entry['pose'])[:3, 3].reshape(-1, 1)
         R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
-            P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
+            P_w, q_si2, phi_max=np.deg2rad(10), R_true=R_SW_true
         )
+        # R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
+        #     P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
+        # )
         T2 = np.eye(4)
         T2[:3, :3], T2[:3, 3] = R_sw_cal, t_s_cal.flatten()
     

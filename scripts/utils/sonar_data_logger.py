@@ -194,9 +194,13 @@ if __name__ == '__main__':
     #     print("\n")
     #     break
     
-    s_p = data[0]['s_p']
-    for s_p_i in s_p:
-        print(np.arctan())
+    for entry in data:
+        temp = []
+        s_p = entry['s_p']
+        for s_p_i in s_p:
+            angle = np.arctan(s_p_i[2] / np.sqrt(s_p_i[0]**2 + s_p_i[1]**2))
+            temp.append(abs(np.rad2deg(angle)))
+        print(max(temp))
     # filepath = "/home/clp/catkin_ws/src/BESTAnP/data/square/noisy_data/noisy_data_seed_0_full.csv"
     # reader = SonarNoisyDataReader(filepath)
     # reader.read_data()
