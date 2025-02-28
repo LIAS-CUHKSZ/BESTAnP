@@ -18,9 +18,10 @@ sonar_image:
 
 sonar_noise:
   Rho_noise: 0.001
-  theta_noise: 0.001
+  theta_noise: 0.01
 
 # 0 manual joystick 
-# 1 predetermined trajectory 
-sonar_control_mode: 1
+# 1 manual rviz drag and keyboard
+# 2 predetermined trajectory 
+sonar_control_mode: 2
 

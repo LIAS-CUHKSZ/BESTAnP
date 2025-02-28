@@ -10,15 +10,15 @@ script_dir = str(script_dir) + "/"
 
 # Append the root dir
 import sys, roslib, os
-BESTAnP_dir = roslib.packages.get_pkg_dir('BESTAnP')
-scripts_dir = os.path.abspath(os.path.join(BESTAnP_dir, 'scripts/anp'))
+lias_anp_dir = roslib.packages.get_pkg_dir('lias_anp')
+scripts_dir = os.path.abspath(os.path.join(lias_anp_dir, 'scripts/anp'))
 sys.path.append(scripts_dir)
 
 from App_Algorithm_2 import App_Algorithm_2
 from Nonapp_Algorithm_2 import Nonapp_Algorithm_2
 from Combine_CIO_2 import Combine_CIO_2
+from BESTAnP_ import BESTAnP
 from BESTAnP_CIO import BESTAnP_CIO
-from ToCAnP import ToCAnP
 from Calculate_CRLB import Calculate_CRLB
 
 class AnPAlgorithm:
@@ -68,16 +68,16 @@ class AnPAlgorithm:
 # APP(p_w, p_si_noise, phi_max, R_true)
     def compute_R_t(self, P_W, P_SI, phi_max=None, R_true=None):
         
-        if self.method == "ToCAnP":
-            R_sw, t_s = ToCAnP(P_W, P_SI)
+        if self.method == "BESTAnP":
+            R_sw, t_s = BESTAnP(P_W, P_SI)
+        if self.method == "BESTAnPCIO":
+            R_sw, t_s = BESTAnP_CIO(P_W, P_SI, phi_max)
         elif self.method == "App":
             R_sw, t_s = App_Algorithm_2(P_W, P_SI, phi_max)
         elif self.method == "Nonapp":
             R_sw, t_s = Nonapp_Algorithm_2(P_W, P_SI, phi_max, R_true)
         elif self.method == "CombineCIO":
             R_sw, t_s = Combine_CIO_2(P_W, P_SI, phi_max, R_true)
-        elif self.method == "BESTAnPCIO":
-            R_sw, t_s = BESTAnP_CIO(P_W, P_SI, phi_max)
         self.t_s, self.R_sw = t_s, R_sw
         
         return self.R_sw, self.t_s

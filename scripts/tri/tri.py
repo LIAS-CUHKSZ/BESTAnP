@@ -5,7 +5,7 @@ import cvxpy as cp
 from scipy.linalg import eig
 
 import sys, roslib, os
-project_root = roslib.packages.get_pkg_dir('BESTAnP')
+project_root = roslib.packages.get_pkg_dir('lias_anp')
 root_dir = os.path.abspath(os.path.join(project_root, 'scripts'))
 sys.path.append(root_dir)
 

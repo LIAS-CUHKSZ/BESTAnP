@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys, roslib, os
-project_root = roslib.packages.get_pkg_dir('BESTAnP')
+project_root = roslib.packages.get_pkg_dir('lias_anp')
 root_dir = os.path.abspath(os.path.join(project_root, 'scripts'))
 sys.path.append(root_dir)
 
@@ -19,7 +19,7 @@ import copy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped, Point, Quaternion, Twist
 from visualization_msgs.msg import Marker
-from BESTAnP.msg import SonarData  # 确保替换为你的包名
+from lias_anp.msg import SonarData  # 确保替换为你的包名
 from std_msgs.msg import Header
 import tf
 
@@ -90,6 +90,9 @@ class Anp_sim:
             self.cmd_vel_sub = rospy.Subscriber('/joy/cmd_vel', Twist, self.remoter_callback)
         elif  sonar_ctrl_mode == 1:
             self.sonar_pose_sub = rospy.Subscriber('/set_sonar_pose', PoseStamped, self.set_pose_callback)
+        elif  sonar_ctrl_mode == 2:
+            self.sonar_pose_sub = rospy.Subscriber('/set_sonar_pose', PoseStamped, self.set_pose_callback)
+        # self.traj_est_pub = rospy.Publisher("/trajectory_est", Path, queue_size=10)
 
 
         # Sonar
@@ -127,9 +130,9 @@ class Anp_sim:
         
         # 限制平移部分在指定边界内
         T_world_t = T_world[:3, 3]
-        # T_world_t[0] = np.clip(T_world_t[0], -2, 2)
-        # T_world_t[1] = np.clip(T_world_t[1], -2, 2)
-        # T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
+        T_world_t[0] = np.clip(T_world_t[0], -2, 2)
+        T_world_t[1] = np.clip(T_world_t[1], -2, 2)
+        T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
         # T_world_t[0] = np.clip(T_world_t[0], self.xmin, self.xmax)
         # T_world_t[1] = np.clip(T_world_t[1], self.ymin, self.ymax)
         # T_world_t[2] = np.clip(T_world_t[2], self.zmin, self.zmax)
@@ -240,7 +243,7 @@ class Anp_sim:
         si_q_xy = []
         si_q_theta_Rho = []
         si_q_xy_img_frame = []
-        for y,x, theta_i, Rho_i in zip(ps_x, ps_y, theta, Rho):
+        for x, y, theta_i, Rho_i in zip(ps_x, ps_y, theta, Rho):
             # Normalize to image coordinates
             x_img = int((x / self.range_max) * (self.img_width) + (self.img_width/2))
             y_img = int((y / self.range_max) * (self.img_height) )
@@ -259,20 +262,16 @@ class Anp_sim:
         si_q_xy_noise = []
         si_q_theta_Rho_noise = []
         si_q_xy_img_frame_noise = []
-        for y, x, theta_i, Rho_i in zip(ps_x_noise, ps_y_noise, theta_noise, Rho_noise):
+        for x, y, theta_i, Rho_i in zip(ps_x_noise, ps_y_noise, theta_noise, Rho_noise):
+            # Normalize to image coordinates
             x_img = int((x / self.range_max) * (self.img_width) + (self.img_width/2))
             y_img = int((y / self.range_max) * (self.img_height) )
             cv2.circle(image, (x_img, y_img), 3, (255, 255, 255), -1)
-            # print((x_img, y_img))
             si_q_xy_noise.append(np.array([x, y]))
             si_q_theta_Rho_noise.append(np.array([theta_i, Rho_i]))
             si_q_xy_img_frame_noise.append(np.array([self.img_width/2-x_img, y_img]))
                 
         # Convert to ROS Image message and publish
-        # cv2.imshow("test", image)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        
         ros_image = self.bridge.cv2_to_imgmsg(image, encoding="bgr8")
         self.sonar_image_pub.publish(ros_image)
         
@@ -481,13 +480,13 @@ class Anp_sim:
 
 if __name__ == '__main__':
     rospack = rospkg.RosPack()
-    package_path = rospack.get_path('BESTAnP')
+    package_path = rospack.get_path('lias_anp')
     yaml_file_path = os.path.join(package_path, 'yaml/sim_env.yaml')
     # yaml_file_path = os.path.join(package_path, 'yaml/sim_env_simple.yaml')
     
     # manual_ctr = True
     # if len(sys.argv) != 2 or sys.argv[1] not in ['-m', '-a']:
-    #     print("Usage: rosrun BESTAnP simulator.py -m/-a (manual control by default)")
+    #     print("Usage: rosrun lias_anp simulator.py -m/-a (manual control by default)")
     # elif sys.argv[1] != '-m':
     #     manual_ctr = False
     estimator = Anp_sim(yaml_file_path)
