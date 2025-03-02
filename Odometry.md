@@ -41,7 +41,7 @@ sonar_attribute: # sonar parameters
   range_max: 6 # detection range
 ```
 
-We provide 3 trajectory. You can find the recorded data under `data/` with **sonar_data.csv,** where we provide robot poses T*_t* and sonar data SI*_q_*t. We set noise added to  T*_t* and SI*_q_*t in `yaml/odom.yaml` .
+We provide 3 trajectory. You can find the recorded data under `data/` with **sonar_data.csv,** where we provide robot poses T_t and sonar data SI_q_t. We set noise added to  T_t and SI_q_t in `yaml/odom.yaml` .
 
 ### Run Single Experiment
 
@@ -53,7 +53,7 @@ or
 cd scripts && python3 main.py
 ```
 
-Then you can find the recorded data under `record/` folder and compare the performance by running record/analysis_trajecotry.py
+Then you can find the recorded data under `record/` folder and compare the performance by running `record/analysis_trajecotry.py`
 
 ### Large-scale Experiments
 
