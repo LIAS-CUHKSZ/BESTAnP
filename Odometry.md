@@ -65,4 +65,4 @@ or
 cd scripts && python3 main_batches.py
 ```
 
-You can find the results under results/results.npy and look into it by running `results/analysis_statistically.py`
+The experimental results are stored in results/results.npy. To analyze the statistical findings, please run `results/analysis_statistically.py`
