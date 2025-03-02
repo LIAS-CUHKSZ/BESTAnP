@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import rospy
 import numpy as np
-from lias_anp.msg import SonarData  # 确保替换为你的包名
+from BESTAnP.msg import SonarData  # 确保替换为你的包名
 import csv
 
 class SonarDataWriter:
@@ -152,12 +152,12 @@ class SonarDataReader:
         return self.data
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # Read
-    data_dir="/home/clp/catkin_ws/src/lias_anp/data/sonar_data.csv"
-    noisy_data_dir="/home/clp/catkin_ws/src/lias_anp/data/sonar_data_noisy.csv"
-    sonar_data_write = SonarDataWriter(data_dir, noisy_data_dir)
-    sonar_data_write.write()
+    # data_dir="/home/clp/catkin_ws/src/BESTAnP/data/sonar_data.csv"
+    # noisy_data_dir="/home/clp/catkin_ws/src/BESTAnP/data/sonar_data_noisy.csv"
+    # sonar_data_write = SonarDataWriter(data_dir, noisy_data_dir)
+    # sonar_data_write.write()
     
     # Write
     # filepath = "/home/clp/catkin_ws/src/lias_anp/scripts/sim/noisy_sonar_data.csv"

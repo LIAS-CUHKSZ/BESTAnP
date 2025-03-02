@@ -10,7 +10,7 @@ script_dir = str(script_dir) + "/"
 
 # Append the root dir
 import sys, roslib, os
-lias_anp_dir = roslib.packages.get_pkg_dir('lias_anp')
+lias_anp_dir = roslib.packages.get_pkg_dir('BESTAnP')
 scripts_dir = os.path.abspath(os.path.join(lias_anp_dir, 'scripts/anp'))
 sys.path.append(scripts_dir)
 

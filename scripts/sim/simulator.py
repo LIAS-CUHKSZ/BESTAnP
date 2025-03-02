@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys, roslib, os
-project_root = roslib.packages.get_pkg_dir('lias_anp')
+project_root = roslib.packages.get_pkg_dir('BESTAnPs')
 root_dir = os.path.abspath(os.path.join(project_root, 'scripts'))
 sys.path.append(root_dir)
 
