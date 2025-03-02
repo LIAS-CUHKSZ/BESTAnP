@@ -30,20 +30,16 @@ Wenliang Sheng*, Hongxu Zhao*, [Lingpeng Chen](https://scholar.google.com/citati
 
 # What this repo provide and how to use
 
+![AnP simulator](./fig/gif.gif)
+
 ## Algorithm in matlab
 
 If you only want the source code for BESTAnP and baseline algorithms, you can go to folder [MatlabCode](https://github.com/LIAS-CUHKSZ/BESTAnP/blob/main/MatabCode/README.md).
 
 ## Sonar-only odometry
 
-In this work, we integrate our BESTAnP algorithm with feature point triangulation to develop a pure sonarbased odometry system. To the best of our knowledge, no study has put forward an odometry from
-sonar-only measurements.
+In this work, we integrate our BESTAnP algorithm with feature point triangulation to develop a pure sonarbased odometry system. To the best of our knowledge, no study has put forward an odometry from sonar-only measurements. To run the odometry, please see [Odo](https://github.com/LIAS-CUHKSZ/BESTAnP/blob/main/Odometry.md)
 
-## AnP simulator
-
-Anp simulator is a ROS package developed under ros-noetic with which you can test your own algorithm. If you want to generate data set by our own, you can use our package.
-
-![AnP simulator](./fig/gif.gif)
 
 # **Contact**
 

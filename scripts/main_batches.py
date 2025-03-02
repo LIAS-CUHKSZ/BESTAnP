@@ -62,7 +62,7 @@ class AnPSonarSLAM:
         """Read configurations from YAML files."""
         config = {}
         # Read odom.yaml
-        with open(os.path.join(BESTAnP_dir, 'yaml/odom.yaml'), 'r') as file:
+        with open(os.path.join(BESTAnP_dir, 'yaml/odom_batches.yaml'), 'r') as file:
             odom_params = yaml.safe_load(file)
             config.update({
                 'RECONSTRUCTION_ERROR_THRESHOLD': odom_params['RECONSTRUCTION_ERROR_THRESHOLD'],
@@ -76,7 +76,7 @@ class AnPSonarSLAM:
         # Read sim_env.yaml
         with open(os.path.join(BESTAnP_dir, 'yaml/sim_env.yaml'), 'r') as file:
             sim_env_params = yaml.safe_load(file)
-            config['PHI_MAX'] = 0.5 * int(sim_env_params['sonar_attribute']['fov_vertical']) * np.pi / 180
+            config['PHI_MAX'] = int(sim_env_params['sonar_attribute']['fov_vertical']) * np.pi / 180
         return config
 
     def initialize_data(self):
@@ -323,32 +323,35 @@ class AnPSonarSLAM:
 if __name__ == "__main__":
     methods = ['BESTAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
     trajectory_shape = ['square', 'circle', 'eight']
-
-    random_seeds = [i for i in range(500)]
+    large_size_size = 2
+    random_seeds = [i for i in range(large_size_size)]
     all_results = np.zeros((len(random_seeds), len(methods)*len(trajectory_shape), 4))  # (seed_num, methods, metrics)
     for seed_num in random_seeds:
         np.random.seed(seed_num)
         print("Random Seed Number: ", seed_num)
         results_matrix = np.zeros((len(methods)*len(trajectory_shape), 4))
         row_index = 0  # To track the current row in the matrix
-        for shape in trajectory_shape:
-            for method in methods:       
-                try:
-                    path = "data/{shape}/sonar_data.csv".format(shape=shape)
-                    anp_slam = AnPSonarSLAM(data_path=path, method=method)
-                    anp_slam.run()
-                    real_poses, estimated_poses = anp_slam.get_result()
-                    ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
-                    RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
-                    results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
-                except:
-                    print("PROBLEM!")
-                    results_matrix[row_index] = [0, 0, 0, 0]
-                row_index += 1
+        try:
+            for shape in trajectory_shape:
+                for method in methods:       
+                    try:
+                        path = "data/{shape}/sonar_data.csv".format(shape=shape)
+                        anp_slam = AnPSonarSLAM(data_path=path, method=method)
+                        anp_slam.run()
+                        real_poses, estimated_poses = anp_slam.get_result()
+                        ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
+                        RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
+                        results_matrix[row_index] = [ATE_t, ATE_R, RTE_t, RTE_R]
+                    except:
+                        print("PROBLEM!")
+                        results_matrix[row_index] = [0, 0, 0, 0]
+                    row_index += 1
+        except:
+            pass
         # all_results[0] = results_matrix     
         all_results[seed_num] = results_matrix     
         
    
-    save_dir = BESTAnP_dir + '/results/all_metrics_10degree.npy'
+    save_dir = BESTAnP_dir + f'/results/results_{large_size_size}.npy'
     np.save(save_dir, all_results)
     print("DONE")

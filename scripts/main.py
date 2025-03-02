@@ -38,6 +38,7 @@ class AnPSonarSLAM:
         
         self.sonar_data_dir = os.path.join(str(BESTAnP_dir), data_path or self.config['DATA_PATH'])
         self.record_dir = os.path.join(BESTAnP_dir, "record", self.method)
+        os.makedirs(self.record_dir, exist_ok=True)
         
         self.anp_algorithm = AnPAlgorithm(self.method)
         self.P_dict = {}
@@ -228,11 +229,8 @@ class AnPSonarSLAM:
         R_SW_true = ros_pose_to_transform_matrix(entry['pose'])[:3, :3]
         t_S_true = ros_pose_to_transform_matrix(entry['pose'])[:3, 3].reshape(-1, 1)
         R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
-            P_w, q_si2, phi_max=np.deg2rad(10), R_true=R_SW_true
+            P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
         )
-        # R_sw_cal, t_s_cal = self.anp_algorithm.compute_R_t(
-        #     P_w, q_si2, phi_max=config['PHI_MAX'], R_true=R_SW_true
-        # )
         T2 = np.eye(4)
         T2[:3, :3], T2[:3, 3] = R_sw_cal, t_s_cal.flatten()
     
@@ -327,18 +325,18 @@ if __name__ == "__main__":
     methods = ['BESTAnP', 'CombineCIO', 'BESTAnPCIO', 'Nonapp', 'App']
     trajectory_shape = ['square', 'circle', 'eight']
     
-    for test_seed_num in range(1):
-        np.random.seed(test_seed_num)  
-        for shape in trajectory_shape:
-            print(shape)
-            print("{:<10} {:<8}  {:<8}  {:<8}  {:<8}".format("method", "ATE_t", "ATE_R", "RPE_t", "RPE_R"))
-            for method in methods:
-                path = "data_old/{shape}/sonar_data.csv".format(shape=shape)
-                anp_slam = AnPSonarSLAM(data_path=path, method=method)
-                anp_slam.run()
-                real_poses, estimated_poses = anp_slam.get_result()
-                ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
-                RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
-                print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
+    test_seed_num = 0
+    np.random.seed(test_seed_num)  
+    for shape in trajectory_shape:
+        print(shape)
+        print("{:<10} {:<8}  {:<8}  {:<8}  {:<8}".format("method", "ATE_t", "ATE_R", "RPE_t", "RPE_R"))
+        for method in methods:
+            path = "data/{shape}/sonar_data.csv".format(shape=shape)
+            anp_slam = AnPSonarSLAM(data_path=path, method=method)
+            anp_slam.run()
+            real_poses, estimated_poses = anp_slam.get_result()
+            ATE_t, ATE_R = calculate_ATE(real_poses, estimated_poses)
+            RTE_t, RTE_R = calculate_RPE(real_poses, estimated_poses)
+            print("{:<10} {:<8.4f}  {:<8.2f}  {:<8.4f}  {:<8.2f}".format(method, ATE_t, ATE_R, RTE_t, RTE_R))
 
-            
+        

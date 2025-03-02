@@ -170,14 +170,12 @@ def calculate_RPE(real_poses, estimated_poses):
 if __name__ == "__main__":
 
     plotter = TrajectoryPlotter()
-    # index= 2  # 1 circle 2 eight 3 square
-    # index= 2  # 1 square 2 circle 3  eight
-    index= 6  # 1 square 2 circle 3  eight
-    ToCAnP_path = "/home/clp/catkin_ws/src/lias_anp/record/ToCAnP/record{index}/atraj.csv".format(index=str(index))
-    CIO_path = "/home/clp/catkin_ws/src/lias_anp/record/CombineCIO/record{index}/atraj.csv".format(index=str(index))
-    BESTAnPCIO_path = "/home/clp/catkin_ws/src/lias_anp/record/BESTAnPCIO/record{index}/atraj.csv".format(index=str(index))
-    Nonapp_path = "/home/clp/catkin_ws/src/lias_anp/record/Nonapp/record{index}/atraj.csv".format(index=str(index))
-    App_path = "/home/clp/catkin_ws/src/lias_anp/record/App/record{index}/atraj.csv".format(index=str(index))
+    index= 3  # 1 square 2 circle 3  eight
+    ToCAnP_path = "BESTAnP/record{index}/atraj.csv".format(index=str(index))
+    CIO_path = "CombineCIO/record{index}/atraj.csv".format(index=str(index))
+    BESTAnPCIO_path = "BESTAnPCIO/record{index}/atraj.csv".format(index=str(index))
+    Nonapp_path = "Nonapp/record{index}/atraj.csv".format(index=str(index))
+    App_path = "App/record{index}/atraj.csv".format(index=str(index))
     real_poses1, estimated_poses_ToCAnP, coordinates_list = read_csv_file(ToCAnP_path)
     real_poses2, estimated_poses_CIO, coordinates_list = read_csv_file(CIO_path)
     real_poses3, estimated_poses_Nonapp, coordinates_list = read_csv_file(Nonapp_path)
