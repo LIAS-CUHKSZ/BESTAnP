@@ -38,7 +38,7 @@ If you only want the source code for BESTAnP and baseline algorithms, you can go
 
 ## Sonar-only odometry
 
-In this work, we integrate our BESTAnP algorithm with feature point triangulation to develop a pure sonarbased odometry system. To the best of our knowledge, no study has put forward an odometry from sonar-only measurements. To run the odometry, please see [Odo](https://github.com/LIAS-CUHKSZ/BESTAnP/blob/main/Odometry.md)
+In this work, we integrate our BESTAnP algorithm with feature point triangulation to develop a pure sonarbased odometry system. To the best of our knowledge, no study has put forward an odometry from sonar-only measurements. To run the odometry, please see [Odo](https://github.com/LIAS-CUHKSZ/BESTAnP/blob/main/Odometry.md).
 
 
 # **Contact**
