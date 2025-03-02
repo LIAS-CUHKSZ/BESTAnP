@@ -4,8 +4,6 @@
 
 This code is for Section V.*B. Sonar-Based Odometry with Unknown 3D Points*. The algorithm is as following.
 
- **
-
 ![image.png](./fig/algorithm.jpg)
 
 # Quick Setup
