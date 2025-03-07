@@ -93,6 +93,7 @@ function [R_est_noise_GN,t_est_noise_GN] = BESTAnP(p_w,p_si_noise)
     e_2 = [0 1 0]';
     I = eye(3);
 
+    % 3 * n
     u_i = p_w-t_est_noise;
 
     %残差
@@ -117,6 +118,7 @@ function [R_est_noise_GN,t_est_noise_GN] = BESTAnP(p_w,p_si_noise)
 
 
     ukronR_2 = kron(u_i'*R_est_noise, I);
+    % 1*3 * 3*3 *3*n =1 * n
     g_2 = e_2'*R_est_noise'*u_i;
     h_2 = e_1'*R_est_noise'*u_i;
 
@@ -126,6 +128,7 @@ function [R_est_noise_GN,t_est_noise_GN] = BESTAnP(p_w,p_si_noise)
     % 更新 J_R 的奇数行
     J_R_2(1:2:end, 4:6) = (u_i ./ vecnorm(u_i) / stdVar_noise_d_est)';
 %     % 更新 J_R 的偶数行
+    % n*1 .* 1*3 -n*1 .* 1*3   
     h_g_result = (h_2' .* e_2' - g_2' .* e_1');
 
     for i = 1:num_points

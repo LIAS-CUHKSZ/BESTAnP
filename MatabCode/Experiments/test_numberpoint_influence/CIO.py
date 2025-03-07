@@ -54,6 +54,8 @@ def CIO(R_Noise_He_new,t_S_Noise_He_opt,p_w,p_si_noise,phi_max):
     
     # 优化的初始猜测：使用已知的四元数和位移向量 
     qt_init = np.hstack((q_init, t_init)) #拼接四元数和t
+
+    ##print(t_S_Noise_He_opt)
     
     # 设置非线性约束条件
     nlc_CIO = NonlinearConstraint(con_qt, -phi_max, phi_max)

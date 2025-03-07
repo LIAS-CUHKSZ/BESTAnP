@@ -93,6 +93,7 @@ function [R_final,t_final] = App_Algorithm(p_w,p_si_noise,phi_max,py_path)
 
     %计算 tz
     result_app_t = py.calculate_tz.calculate_tz(R_Noise_He_app, t_S_Noise_He_app, p_w_app, p_si_noise, phi_max);
+     % result_app_t = py.calculate_tz.calculate_tz(R_Noise_He_app);
     t_S_Noise_He_app  = double(result_app_t)';
 
     t_S_Noise_He_app_w  = -R_Noise_He_app'*t_S_Noise_He_app;

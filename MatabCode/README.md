@@ -9,12 +9,27 @@ Additionally, the project integrates MATLAB with Python to leverage the SLSQP op
 
 ### 1. **Algorithm**  
 This folder contains the core algorithms and utility functions:  
+- **BESTAnP_initial_solution.m**  
+  The consistent estimators with 6 degrees of freedom
+
 - **BESTAnP.m**  
-  The core algorithm proposed in this project.  
+  The core algorithm proposed in this project (The consistent estimators with 6 degrees of freedom + a single GN Iterative).  
+
+- **BESTAnP_CIO.m**  
+  BESTAnP algorithm + CIO.  
+
 - **App_Algorithm.m**  
-  An approximate algorithm.  
+  An approximate algorithm. 
+
+- **App_Algorithm_GN.m**  
+  An approximate algorithm + a single GN Iterative. 
+
 - **Nonapp_Algorithm.m**  
   A non-approximate algorithm.  
+
+- **Nonapp_Algorithm_GN.m**  
+  A non-approximate algorithm + a single GN Iterative.  
+
 - **Combine_CIO.m**  
   Combines the results of App_Algorithm and Nonapp_Algorithm, refining them with Consistent Iterative Optimization (CIO).  
 
