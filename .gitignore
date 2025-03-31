@@ -7,3 +7,4 @@ data/eight/noisy_data/*
 /scripts/anp/__pycache__/*
 /scripts/simulation/convert.py
 /scripts/simulation/simulator_for_rss.py
+scripts/anp_previous/*

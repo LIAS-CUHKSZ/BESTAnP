@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import svd, inv
 from calculate_tz import calculate_tz
+from numpy.linalg import matrix_rank
 
 from isRotationMatrix import isRotationMatrix,ToRotationMatrix
 
@@ -36,12 +37,20 @@ def Nonapp_Algorithm_2(p_w, p_si_noise, phi_max, R_true, py_path=None):
     M_Noise_He = np.dot(M_Noise_He, W_Noise_He.T)
     M_Noise_He = np.dot(M_Noise_He, H_Noise_He) - H_Noise_He
 
+    rank = matrix_rank(M_Noise_He)
+    nullity = M_Noise_He.shape[1] - rank  # 列数减去秩
+    # print('M的大小',M_Noise_He.shape[0],'*',M_Noise_He.shape[1])
+    # print('M的秩',rank)
+    # print('M的零空间维度',nullity)
+
     # Perform SVD decomposition
     U_Noise_He, S_Noise_He, V_Noise_He = svd(M_Noise_He)
 
     # Calculate r_1 and r_2
     r_1 = np.sqrt(2) * V_Noise_He[5, :]
     r_2 = -np.sqrt(2) * V_Noise_He[5, :]
+
+    # print('r_1:',r_1)
 
     # print(r_1)
 
