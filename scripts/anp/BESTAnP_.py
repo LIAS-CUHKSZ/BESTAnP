@@ -152,7 +152,7 @@ def BESTAnP(p_w, p_si_noise):
     Residuals_R[0::2] = f_1_residual
     Residuals_R[1::2] = f_2_residual
 
-    J_phi = np.array([
+    J_phi = - np.array([
         [0, 0, 0],
         [0, 0, 1],
         [0, -1, 0],
